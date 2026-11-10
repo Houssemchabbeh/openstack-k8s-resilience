@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Temporarily unavailable{% endblock %}
+{% block content %}
+<div class="box warn">
+  <strong>Registration is temporarily unavailable.</strong>
+  We are working on it. Please try again in a minute; there is no need to register by email.
+</div>
+{% if courses %}
+<p>Course list as of {{ cached_at.strftime("%H:%M:%S UTC") }} (may be out of date):</p>
+{% include "_courses.html" %}
+{% endif %}
+{% endblock %}

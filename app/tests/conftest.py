@@ -12,7 +12,7 @@ import pytest
 
 APP_DIR = pathlib.Path(__file__).resolve().parents[1]
 DSN = os.environ.get(
-    "TEST_DATABASE_URL", "postgresql://postgres:dev@localhost:5432/portal_test"
+    "TEST_DATABASE_URL", "postgresql://postgres:dev@localhost:5433/portal_test"
 )
 
 
@@ -27,15 +27,16 @@ def dsn():
 
 @pytest.fixture
 def courses(dsn):
-    """Fresh schema with two courses; returns {code: id}."""
+    """Fresh schema with three courses (one hidden); returns {code: id}."""
     with psycopg.connect(dsn, autocommit=True) as conn:
         conn.execute("DROP TABLE IF EXISTS registrations, courses")
         conn.execute((APP_DIR / "schema.sql").read_text())
         conn.execute(
             """
-            INSERT INTO courses (code, title, kind, capacity, opens_at) VALUES
-                ('BIG',  'Big course',  'elective',  10, now()),
-                ('TINY', 'Tiny course', 'lab_group',  2, now())
+            INSERT INTO courses (code, title, kind, capacity, opens_at, hidden) VALUES
+                ('BIG',    'Big course',    'elective',  10, now(), false),
+                ('TINY',   'Tiny course',   'lab_group',  2, now(), false),
+                ('HIDDEN', 'Hidden course', 'elective',  10, now(), true)
             """
         )
         return dict(conn.execute("SELECT code, id FROM courses").fetchall())

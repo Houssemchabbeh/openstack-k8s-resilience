@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Receipt {{ r.receipt }}{% endblock %}
+{% block content %}
+{% if again %}
+<div class="box warn">You were already registered for this course. Here is your existing receipt.</div>
+{% else %}
+<div class="box ok">Registration confirmed.</div>
+{% endif %}
+<p>Receipt number</p>
+<p class="receipt">{{ r.receipt }}</p>
+<table>
+  <tr><th>Student ID</th><td>{{ r.student_id }}</td></tr>
+  <tr><th>Course</th><td>{{ r.code }} - {{ r.title }}</td></tr>
+  <tr><th>Type</th><td>{{ "Lab group" if r.kind == "lab_group" else "Elective" }}</td></tr>
+  <tr><th>Registered at</th><td>{{ r.created_at_utc.strftime("%d %b %Y, %H:%M:%S UTC") }}</td></tr>
+</table>
+<p>Keep this number: it proves your registration. <a href="/">Back to the course list</a></p>
+{% endblock %}

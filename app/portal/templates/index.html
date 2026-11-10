@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="post" action="{{ url_for('portal.register_seat') }}">
+  <label>Student ID
+    <input name="student_id" required maxlength="32" pattern="[A-Za-z0-9\-]+" placeholder="e.g. 20231234">
+  </label>
+  <label>Course
+    <select name="course_id" required>
+      {% for c in courses %}
+      <option value="{{ c.id }}">{{ c.code }} - {{ c.title }}{% if c.seats_taken >= c.capacity %} (full){% endif %}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button type="submit">Register</button>
+</form>
+{% include "_courses.html" %}
+{% endblock %}

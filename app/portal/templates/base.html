@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Course registration{% endblock %}</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 52rem; margin: 2rem auto; padding: 0 1rem; color: #1f2933; }
+    h1 a { color: inherit; text-decoration: none; }
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    th, td { text-align: left; padding: .4rem .6rem; border-bottom: 1px solid #d9e2ec; }
+    .full { color: #b42318; font-weight: 600; }
+    .box { padding: 1rem; border-radius: .4rem; margin: 1rem 0; }
+    .ok { background: #e3f9e5; } .warn { background: #fff3c4; } .err { background: #ffe3e3; }
+    form { display: flex; gap: .6rem; flex-wrap: wrap; align-items: end; margin: 1rem 0; }
+    label { display: flex; flex-direction: column; font-size: .9rem; gap: .2rem; }
+    input, select, button { font: inherit; padding: .35rem .5rem; }
+    .receipt { font-family: ui-monospace, monospace; font-size: 1.8rem; margin: .2rem 0 1rem; }
+    footer { margin-top: 2rem; font-size: .8rem; color: #829ab1; }
+  </style>
+</head>
+<body>
+  <h1><a href="/">Elective &amp; lab-group registration</a></h1>
+  {% block content %}{% endblock %}
+  <footer>served by {{ hostname }}</footer>
+</body>
+</html>

@@ -1,0 +1,13 @@
+<table>
+  <tr><th>Code</th><th>Title</th><th>Type</th><th>Seats left</th><th>Opens</th></tr>
+  {% for c in courses %}
+  {% set left = c.capacity - c.seats_taken %}
+  <tr>
+    <td>{{ c.code }}</td>
+    <td>{{ c.title }}</td>
+    <td>{{ "Lab group" if c.kind == "lab_group" else "Elective" }}</td>
+    <td>{% if left > 0 %}{{ left }} / {{ c.capacity }}{% else %}<span class="full">full</span>{% endif %}</td>
+    <td>{{ c.opens_at_utc.strftime("%a %d %b %Y, %H:%M UTC") }}</td>
+  </tr>
+  {% endfor %}
+</table>
