@@ -1,0 +1,16 @@
+# secrets and local credentials
+clouds.yaml
+*.env
+.env*
+kubeconfig*
+*.pem
+*.key
+
+# python
+__pycache__/
+.venv/
+.pytest_cache/
+
+# large raw evidence (keep CSV/PNG, not dumps)
+*.dump
+*.sql.gz
