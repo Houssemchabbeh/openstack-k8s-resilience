@@ -6,6 +6,13 @@ kubeconfig*
 *.pem
 *.key
 
+# terraform (state holds instance details; never commit it)
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+crash.log
+
 # python
 __pycache__/
 .venv/
