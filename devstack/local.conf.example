@@ -1,0 +1,24 @@
+# DevStack config for the resilience project.
+# Template only: the __PLACEHOLDERS__ are filled on the EC2 host, never in Git.
+# Copy to ~/devstack/local.conf on the host, fill placeholders, then ./stack.sh
+
+[[local|localrc]]
+# --- passwords (Horizon/CLI admin login; also reused by internal services) ---
+ADMIN_PASSWORD=__ADMIN_PASSWORD__
+DATABASE_PASSWORD=$ADMIN_PASSWORD
+RABBIT_PASSWORD=$ADMIN_PASSWORD
+SERVICE_PASSWORD=$ADMIN_PASSWORD
+
+# --- host private IP (stable across EC2 stop/start) ---
+HOST_IP=__HOST_IP__
+
+# --- Swift: object storage for the pg_dump backups ---
+enable_service s-proxy s-object s-container s-account
+SWIFT_HASH=__SWIFT_HASH__
+SWIFT_REPLICAS=1
+SWIFT_LOOPBACK_DISK_SIZE=10G
+
+# --- Cinder: volumes (Postgres PVC) + volume backups stored in Swift ---
+enable_service c-bak
+CINDER_BACKUP_DRIVER=swift
+VOLUME_BACKING_FILE_SIZE=30G
