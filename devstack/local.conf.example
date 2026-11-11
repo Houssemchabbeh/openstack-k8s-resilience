@@ -1,6 +1,7 @@
 # DevStack config for the resilience project.
 # Template only: the __PLACEHOLDERS__ are filled on the EC2 host, never in Git.
 # Copy to ~/devstack/local.conf on the host, fill placeholders, then ./stack.sh
+# Tested 2026-11-11: DevStack master 2027.1 (commit 902e73e) on Ubuntu 26.04, stack.sh 783 s.
 
 [[local|localrc]]
 # --- passwords (Horizon/CLI admin login; also reused by internal services) ---
