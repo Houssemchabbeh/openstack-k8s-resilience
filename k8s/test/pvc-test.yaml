@@ -1,0 +1,37 @@
+# M2 proof: Kubernetes asks OpenStack for storage.
+# PVC -> Cinder CSI creates a Cinder volume -> Nova attaches it to the node -> pod writes a file.
+# Delete after the check (the volume stays because of Retain; delete it in OpenStack by hand).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: csi-test
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-pvc
+  namespace: csi-test
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: cinder-retain
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-writer
+  namespace: csi-test
+spec:
+  containers:
+    - name: writer
+      image: busybox:1.37
+      command: ["sh", "-c", "date > /data/hello.txt && cat /data/hello.txt && df -h /data && sleep 3600"]
+      volumeMounts:
+        - name: data
+          mountPath: /data
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: test-pvc

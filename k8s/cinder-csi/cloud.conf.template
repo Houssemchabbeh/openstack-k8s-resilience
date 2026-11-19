@@ -1,0 +1,14 @@
+# Cinder CSI cloud config. Template only: placeholders are filled on the EC2 host
+# from ~/secrets/appcred-k3s.yaml, then stored as the Secret kube-system/cinder-csi-cloud-config.
+# The filled file (cloud.conf) never goes into Git.
+[Global]
+# Keystone behind Apache on the host's private IP (pods reach it via router SNAT -> br-ex)
+auth-url=http://172.31.91.27/identity
+region=RegionOne
+# Application credential "k3s-resilience": scoped to project "resilience", no password needed
+application-credential-id=__APPCRED_ID__
+application-credential-secret=__APPCRED_SECRET__
+
+[BlockStorage]
+# Default limit for virtio disks; keeps the scheduler honest about attachments per node
+node-volume-attach-limit=25

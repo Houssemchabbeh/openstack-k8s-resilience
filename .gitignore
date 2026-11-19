@@ -21,3 +21,6 @@ __pycache__/
 # large raw evidence (keep CSV/PNG, not dumps)
 *.dump
 *.sql.gz
+
+# filled cloud config for Cinder CSI (template is k8s/cinder-csi/cloud.conf.template)
+cloud.conf

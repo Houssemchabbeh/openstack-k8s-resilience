@@ -1,0 +1,15 @@
+# Helm values for chart cpo/openstack-cinder-csi (kubernetes.github.io/cloud-provider-openstack).
+# Chart 2.37.1 = driver v1.37.1, matches k3s v1.37 (checked 2026-11-19).
+# Install: helm upgrade --install cinder-csi cpo/openstack-cinder-csi -n kube-system --version 2.37.1 -f values.yaml
+
+secret:
+  # Read OpenStack credentials from an existing Secret (created by hand from cloud.conf.template),
+  # instead of a cloud.conf file on each node's disk.
+  enabled: true
+  create: false
+  name: cinder-csi-cloud-config
+
+# The chart can create two StorageClasses (delete + retain). We define our own in
+# k8s/storageclass-cinder-retain.yaml so the reclaim policy is explicit and reviewed.
+storageClass:
+  enabled: false
