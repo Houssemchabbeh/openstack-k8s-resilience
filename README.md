@@ -22,47 +22,7 @@ yes or no answer:
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    dev[Developer laptop<br/>Terraform, SSH tunnels]
-    gh[GitHub]
-    ghcr[GHCR<br/>container registry]
-
-    subgraph aws[AWS us-east-1]
-      subgraph ec2[EC2 r8i.large, Ubuntu, nested virtualization]
-        jenkins[Jenkins<br/>delivery + nightly restore test]
-        probe[probe / load generator]
-        subgraph os[OpenStack DevStack: Keystone, Nova, Glance, Neutron, Cinder, Swift]
-          fip[Floating IP]
-          router[k3s-router]
-          subgraph k3s[k3s cluster, network 10.20.0.0/24]
-            subgraph a[VM node-a, k3s server]
-              traefik[Traefik ingress]
-              web1[web pod]
-              pg[(PostgreSQL)]
-            end
-            subgraph b[VM node-b, k3s agent]
-              web2[web pod]
-              cron[CronJob pg-backup]
-            end
-          end
-          cinder[(Cinder volume)]
-          swift[(Swift container)]
-        end
-      end
-    end
-
-    dev -- SSH tunnel --> fip --> router --> traefik
-    traefik --> web1 & web2
-    web1 & web2 --> pg
-    pg -- Cinder CSI --> cinder
-    cron -- pg_dump every 15 min --> swift
-    swift -- nightly restore test --> jenkins
-    jenkins -- poll --> gh
-    jenkins -- push image --> ghcr
-    jenkins -- kubectl --> fip
-    probe -- HTTP --> fip
-```
+![Architecture: a developer laptop reaches, through an SSH tunnel, the floating IP of a k3s cluster (node-a server, node-b agent) running inside OpenStack DevStack on one AWS EC2 instance. Traefik routes to two web pods and a PostgreSQL StatefulSet on a Cinder volume; a CronJob sends pg_dump backups to Swift; Jenkins on the host delivers images via GHCR. The animation steps through the request path, delivery, backups and failure drills.](docs/diagrams/architecture.gif)
 
 Everything runs inside one EC2 instance. Nested virtualization lets the
 OpenStack VMs use KVM instead of slow emulation. Only SSH is open on the
