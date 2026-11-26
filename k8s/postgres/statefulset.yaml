@@ -1,0 +1,77 @@
+# PostgreSQL, single replica (v1, deliberate: F2 measures Cinder detach/reattach).
+# Data lives on a Cinder volume (StorageClass cinder-retain), not on the VM disk.
+#
+# Needs, created by hand on the host (never in Git):
+#   - Secret    postgres-auth  (key POSTGRES_PASSWORD)            -> see k8s/secrets/README.md
+#   - ConfigMap postgres-init  (from app/schema.sql, app/seed.sql) -> runs once, on an empty data dir
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: registration
+  labels:
+    app: postgres
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: docker.io/library/postgres:17
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: portal
+            - name: POSTGRES_DB
+              value: registration
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-auth
+                  key: POSTGRES_PASSWORD
+            # Subfolder: a fresh ext4 volume has lost+found at its root,
+            # and initdb refuses to initialise a non-empty directory.
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: init
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
+          # Ready = accepting connections. No liveness probe on purpose: restarting a
+          # slow-but-alive database (e.g. during recovery after F2) would only make it worse.
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "portal", "-d", "registration"]
+            periodSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+      volumes:
+        - name: init
+          configMap:
+            name: postgres-init
+  # One PVC per replica, created from this template -> Cinder CSI creates the Cinder volume.
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        storageClassName: cinder-retain
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 2Gi

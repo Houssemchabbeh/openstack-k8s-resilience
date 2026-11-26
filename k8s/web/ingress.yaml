@@ -1,0 +1,19 @@
+# Traefik (k3s default ingress) listens on port 80 of the nodes; node-a's floating IP
+# is the entry point. No host rule: any request on / goes to the portal.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web
+  namespace: registration
+spec:
+  ingressClassName: traefik
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port:
+                  name: http

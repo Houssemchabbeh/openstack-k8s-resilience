@@ -1,0 +1,15 @@
+# Stable in-cluster address for the web pods (port 80 -> gunicorn on 8000).
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: registration
+  labels:
+    app: web
+spec:
+  selector:
+    app: web
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

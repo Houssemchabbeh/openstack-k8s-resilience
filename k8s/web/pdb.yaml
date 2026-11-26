@@ -1,0 +1,12 @@
+# A voluntary disruption (kubectl drain, node maintenance) may not take both web pods at once.
+# Does NOT protect against involuntary loss (a deleted VM, F2) - that is what replicas are for.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: web
+  namespace: registration
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: web

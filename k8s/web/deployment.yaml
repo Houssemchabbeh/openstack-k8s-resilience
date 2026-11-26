@@ -1,0 +1,64 @@
+# The portal (Flask + gunicorn), 2 replicas spread across node-a and node-b.
+# Needs Secret postgres-auth (key DATABASE_URL) -> see k8s/secrets/README.md
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: registration
+  labels:
+    app: web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0      # never go below 2 ready pods during a rollout
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      # Prefer one pod per node. ScheduleAnyway (not DoNotSchedule): if a node is lost (F2),
+      # the replacement pod may still start on the surviving node.
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: web
+      containers:
+        - name: web
+          image: ghcr.io/houssemchabbeh/registration-portal:8a950ef
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-auth
+                  key: DATABASE_URL
+          # /readyz does NOT check the DB: during a DB outage the pods stay in the Service
+          # and serve the maintenance page (503 + Retry-After) instead of Traefik's bare 503.
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
